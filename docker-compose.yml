@@ -1,0 +1,16 @@
+version: '3.3'
+
+volumes:
+  smtp_data:
+    driver: local
+
+services:
+  smtp:
+    image: hmlio/spamsink
+    ports:
+      - 465:465
+    environment:
+      SINK_HOSTNAME: mail.example.com
+      SINK_PORT: 465
+    volumes:
+      - smtp_data:/opt/spamsink/mails
