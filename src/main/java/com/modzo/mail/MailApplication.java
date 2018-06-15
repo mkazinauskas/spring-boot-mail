@@ -8,6 +8,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.mustache.MustacheResourceTemplateLoader;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
@@ -29,21 +30,25 @@ public class MailApplication {
 
     @Bean
     CommandLineRunner command(JavaMailSender javaMailSender,
+                              ResourceLoader resourceLoader,
                               Mustache.Compiler compiler,
                               MustacheResourceTemplateLoader templateLoader) {
-        return (args) -> sendMail(javaMailSender, compiler, templateLoader);
+        return (args) -> sendMail(javaMailSender, resourceLoader, compiler, templateLoader);
 
     }
 
     private void sendMail(JavaMailSender javaMailSender,
+                          ResourceLoader resourceLoader,
                           Mustache.Compiler compiler,
                           MustacheResourceTemplateLoader templateLoader) {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "utf-8");
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "utf-8");
             helper.setFrom("from@mymail.com");
             helper.setTo("to@myMail.com");
             helper.setSubject("Sample message");
+            helper.addAttachment("test_attachment.pdf",
+                    resourceLoader.getResource("classpath:/static/test_attachment.pdf"));
             helper.setText(body(compiler, templateLoader), true);
             javaMailSender.send(mimeMessage);
         } catch (MessagingException e) {
